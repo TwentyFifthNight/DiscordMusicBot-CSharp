@@ -1,0 +1,6 @@
+{
+    "token": "discord_bot_token",
+    "lavalinkpassword": "lavalink_password",
+    "lavalinkport": "lavalink_port",
+    "lavalinkaddress": "lavalink_address"
+}
