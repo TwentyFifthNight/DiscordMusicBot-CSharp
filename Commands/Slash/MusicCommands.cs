@@ -449,27 +449,10 @@ namespace Satescuro.Commands.Slash
 				return;
 			}
 
-			TrackRepeatMode playerMode;
-			switch (mode) 
-			{
-				case LoopMode.Disable:
-					playerMode = TrackRepeatMode.None;
-					break;
-				case LoopMode.Song:
-					playerMode = TrackRepeatMode.Track;
-					break;
-				case LoopMode.Queue:
-					playerMode = TrackRepeatMode.Queue;
-					break;
-				default:
-					playerMode = TrackRepeatMode.None;
-					break;
-			}
-
 			
-			if (!(player.RepeatMode == playerMode))
+			if (!(player.RepeatMode == (TrackRepeatMode) mode))
 			{
-				player.RepeatMode = playerMode;
+				player.RepeatMode = (TrackRepeatMode) mode;
 				await interactionContext.CreateResponseAsync(new DiscordInteractionResponseBuilder()
 					.AddEmbed(new DiscordEmbedBuilder()
 					{
