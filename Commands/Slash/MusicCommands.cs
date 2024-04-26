@@ -173,14 +173,6 @@ namespace Satescuro.Commands.Slash
 					Description = $"{player.CurrentTrack.Title} skipped."
 				}));
 			await player.SkipAsync().ConfigureAwait(false);
-
-			/*if (player.Queue.Count < 1)
-            {
-                Console.WriteLine("No more tracks after skip. Player leaving.");
-                await player.DisconnectAsync().ConfigureAwait(false);
-				await player.DisposeAsync().ConfigureAwait(false);
-			}*/
-
 		}
 
 		[SlashCommand("volume", "Sets playback volume.")]
@@ -291,7 +283,6 @@ namespace Satescuro.Commands.Slash
 				.AddEmbed(new DiscordEmbedBuilder()
 				{
 					Color = DiscordColor.Black,
-					Description = $"Queue shuffle {(player.Shuffle ? "enabled" : "disabled")}."
 				}));
 		}
 
