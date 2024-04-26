@@ -277,12 +277,14 @@ namespace Satescuro.Commands.Slash
 			{
 				return;
 			}
-			player.Shuffle = !player.Shuffle;
+
+			await player.ShuffleAsync().ConfigureAwait(false);
 
 			await interactionContext.EditResponseAsync(new DiscordWebhookBuilder()
 				.AddEmbed(new DiscordEmbedBuilder()
 				{
 					Color = DiscordColor.Black,
+					Description = "Queue shuffled."
 				}));
 		}
 

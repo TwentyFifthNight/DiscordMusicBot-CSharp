@@ -36,5 +36,13 @@ namespace Satescuro.Players.CustomPlayer
             cancellationToken.ThrowIfCancellationRequested();
             return default;
         }
+
+        /// <summary>
+        /// Shuffles the playback queue.
+        /// </summary>
+        public async ValueTask ShuffleAsync()
+        {
+            await Queue.ShuffleAsync();
+        }
     }
 }
