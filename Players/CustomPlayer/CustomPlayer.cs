@@ -8,15 +8,21 @@ using System.Text;
 using System.Threading.Tasks;
 using Lavalink4NET.InactivityTracking.Trackers;
 using DSharpPlus.Entities;
+using Satescuro.Extensions;
 
 namespace Satescuro.Players.CustomPlayer
 {
     public sealed class CustomPlayer : QueuedLavalinkPlayer, IInactivityPlayerListener
     {
+		private readonly DiscordChannel _textChannel;
+        public bool TrackStartedMessage { get; set; } = true;
+
+
 		public CustomPlayer(IPlayerProperties<CustomPlayer, CustomPlayerOptions> properties)
             : base(properties)
         {
-        }
+			_textChannel = properties.Options.Value.TextChannel;
+		}
 
         public ValueTask NotifyPlayerActiveAsync(PlayerTrackingState trackingState, CancellationToken cancellationToken = default)
         {
@@ -37,10 +43,23 @@ namespace Satescuro.Players.CustomPlayer
             return default;
         }
 
-        /// <summary>
-        /// Shuffles the playback queue.
-        /// </summary>
-        public async ValueTask ShuffleAsync()
+		protected override async ValueTask NotifyTrackStartedAsync(ITrackQueueItem track, CancellationToken cancellationToken = default)
+		{
+			await base.NotifyTrackStartedAsync(track, cancellationToken).ConfigureAwait(false);
+
+            if(TrackStartedMessage)
+                await _textChannel.SendMessageAsync(new DiscordEmbedBuilder()
+                {
+                    Description = $"Now playing: {track.Track.ToTrackString()}"
+                });
+		}
+
+
+
+		/// <summary>
+		/// Shuffles the playback queue.
+		/// </summary>
+		public async ValueTask ShuffleAsync()
         {
             await Queue.ShuffleAsync();
         }

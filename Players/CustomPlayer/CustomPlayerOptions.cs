@@ -10,5 +10,6 @@ namespace Satescuro.Players.CustomPlayer
 {
 	public sealed record class CustomPlayerOptions : QueuedLavalinkPlayerOptions
 	{
+		public DiscordChannel TextChannel { get; init; }
 	}
 }

@@ -477,10 +477,31 @@ namespace Satescuro.Commands.Slash
 				{
 					Description = $"Queue length: {player.Queue.Count}" +
 					$"\nRepeat mode: {player.RepeatMode}" +
-					$"\nVolume: {player.Volume * 100}%"
+					$"\nVolume: {player.Volume * 100}%" +
+					$"\nTrack message: {(player.TrackStartedMessage ? "Enabled" : "Disabled")}"
 				}));
 		}
-		
+
+		[SlashCommand("trackmessage", "Toggle showing message at the beginning of a track.")]
+		public async Task TrackMessage(InteractionContext interactionContext)
+		{
+			await interactionContext.DeferAsync();
+			var player = await GetPlayerAsync(interactionContext, connectToVoiceChannel: false).ConfigureAwait(false);
+
+			if (player is null)
+			{
+				return;
+			}
+
+			player.TrackStartedMessage = !player.TrackStartedMessage;
+
+			await interactionContext.EditResponseAsync(new DiscordWebhookBuilder()
+				.AddEmbed(new DiscordEmbedBuilder()
+				{
+					Description = $"Track message: {(player.TrackStartedMessage ? "Enabled" : "Disabled")}"
+				}));
+		}
+
 		private async ValueTask<CustomPlayer?> GetPlayerAsync(InteractionContext interactionContext, bool connectToVoiceChannel = true)
         {
             ArgumentNullException.ThrowIfNull(interactionContext);
@@ -490,7 +511,11 @@ namespace Satescuro.Commands.Slash
 
             var playerOptions = new CustomPlayerOptions { HistoryCapacity = 1000 , DisconnectOnStop = false};
 
-			var options = new CustomPlayerOptions();
+			var options = new CustomPlayerOptions()
+			{
+				TextChannel = interactionContext.Channel
+			};
+
 			var result = await _audioService.Players
 				.RetrieveAsync<CustomPlayer, CustomPlayerOptions>(interactionContext.Guild.Id, interactionContext.Member?.VoiceState.Channel.Id, 
 					CreatePlayerAsync, Options.Create(options), retrieveOptions)
