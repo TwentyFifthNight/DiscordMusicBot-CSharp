@@ -16,6 +16,8 @@ using Lavalink4NET.InactivityTracking.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Satescuro.Database.Context;
+using Microsoft.EntityFrameworkCore;
 
 
 var builder = new HostApplicationBuilder(args);
@@ -56,6 +58,10 @@ builder.Services.ConfigureInactivityTracking(options =>
 });
 
 builder.Services.AddLogging(s => s.AddConsole().SetMinimumLevel(LogLevel.Trace));
+
+builder.Services.AddDbContext<MyDbContext>(
+	options => options.UseSqlite(configuration.DBConnectionString.GetValueOrDefault("Default"))
+);
 
 builder.Build().Run();
 

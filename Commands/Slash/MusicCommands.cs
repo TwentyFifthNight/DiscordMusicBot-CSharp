@@ -16,18 +16,25 @@ using Satescuro.Extensions;
 using System.Diagnostics;
 using Satescuro.Data;
 using Satescuro.Players.CustomPlayer;
+using Satescuro.Database.Context;
+using Satescuro.Database.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Threading;
 
 namespace Satescuro.Commands.Slash
 {
     public class MusicCommands : ApplicationCommandModule
     {
         private readonly IAudioService _audioService;
+		private readonly MyDbContext _context;
 
-        public MusicCommands(IAudioService audioService)
+		public MusicCommands(IAudioService audioService, MyDbContext context)
         {
             ArgumentNullException.ThrowIfNull(audioService);
+			ArgumentNullException.ThrowIfNull(context);
 
-            _audioService = audioService;
+			_audioService = audioService;
+			_context = context;
         }
 
         public override async Task<bool> BeforeSlashExecutionAsync(InteractionContext interactionContext)
@@ -191,6 +198,8 @@ namespace Satescuro.Commands.Slash
 			}
 
 			await player.SetVolumeAsync((float)volume / 100).ConfigureAwait(false);
+
+			await UpdatePlayerDB(player);
 
 			await interactionContext.EditResponseAsync(new DiscordWebhookBuilder()
 				.AddEmbed(new DiscordEmbedBuilder()
@@ -446,6 +455,9 @@ namespace Satescuro.Commands.Slash
 			if (!(player.RepeatMode == (TrackRepeatMode) mode))
 			{
 				player.RepeatMode = (TrackRepeatMode) mode;
+
+				await UpdatePlayerDB(player);
+
 				await interactionContext.CreateResponseAsync(new DiscordInteractionResponseBuilder()
 					.AddEmbed(new DiscordEmbedBuilder()
 					{
@@ -477,7 +489,7 @@ namespace Satescuro.Commands.Slash
 				{
 					Description = $"Queue length: {player.Queue.Count}" +
 					$"\nRepeat mode: {player.RepeatMode}" +
-					$"\nVolume: {player.Volume * 100}%" +
+					$"\nVolume: {(int)(player.Volume * 100)}%" +
 					$"\nTrack message: {(player.TrackStartedMessage ? "Enabled" : "Disabled")}"
 				}));
 		}
@@ -494,6 +506,8 @@ namespace Satescuro.Commands.Slash
 			}
 
 			player.TrackStartedMessage = !player.TrackStartedMessage;
+
+			await UpdatePlayerDB(player);
 
 			await interactionContext.EditResponseAsync(new DiscordWebhookBuilder()
 				.AddEmbed(new DiscordEmbedBuilder()
@@ -513,7 +527,8 @@ namespace Satescuro.Commands.Slash
 
 			var options = new CustomPlayerOptions()
 			{
-				TextChannel = interactionContext.Channel
+				TextChannel = interactionContext.Channel,
+				GuildId = interactionContext.Guild.Id
 			};
 
 			var result = await _audioService.Players
@@ -541,16 +556,70 @@ namespace Satescuro.Commands.Slash
                 return null;
             }
 
-            return result.Player;
+			return result.Player;
         }
 
-		private static ValueTask<CustomPlayer> CreatePlayerAsync(IPlayerProperties<CustomPlayer, 
+		private async ValueTask<CustomPlayer> CreatePlayerAsync(IPlayerProperties<CustomPlayer, 
 			CustomPlayerOptions> properties, CancellationToken cancellationToken = default)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
 			ArgumentNullException.ThrowIfNull(properties);
 
-			return ValueTask.FromResult(new CustomPlayer(properties));
+			CustomPlayer player = new(properties);
+
+
+			if (_context.Players == null)
+				return player;
+
+
+			PlayerEntity? playerEntity = await _context.Players.
+				FirstOrDefaultAsync(x => x.GuildId == properties.Options.Value.GuildId);
+
+			if (playerEntity == null)
+			{
+				playerEntity = new()
+				{
+					Id = 0,
+					GuildId = properties.Options.Value.GuildId,
+					RepeatMode = player.RepeatMode,
+					TrackStartedMessage = player.TrackStartedMessage,
+					Volume = player.Volume
+				};
+
+				_context.Players.Add(playerEntity);
+				await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+			}
+			else
+			{
+				player.RepeatMode = playerEntity.RepeatMode;
+				player.TrackStartedMessage = playerEntity.TrackStartedMessage;
+				await player.SetVolumeAsync(playerEntity.Volume, cancellationToken).ConfigureAwait(false);
+			}
+
+			return player;
+		}
+
+		private async Task UpdatePlayerDB(CustomPlayer player)
+		{
+			PlayerEntity? playerEntity = await _context.Players.
+				FirstOrDefaultAsync(p => p.GuildId == player.GuildId);
+
+			if (playerEntity != null)
+			{
+				playerEntity.RepeatMode = player.RepeatMode;
+				playerEntity.TrackStartedMessage = player.TrackStartedMessage;
+				playerEntity.Volume = player.Volume;
+
+				try
+				{
+					_context.Update(playerEntity);
+					await _context.SaveChangesAsync();
+				}
+				catch (Exception ex)
+				{
+					Debug.WriteLine(ex);
+				}
+			}
 		}
 	}
 }
