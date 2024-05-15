@@ -6,7 +6,7 @@
 ## Requirements
  * .NET 8.0 runtime
  * [JDK 17.0.2](https://jdk.java.net/archive/)
- * [Lavalink 4.0.4](https://github.com/lavalink-devs/Lavalink/releases)
+ * [Lavalink 4.0.5](https://github.com/lavalink-devs/Lavalink/releases)
    
 
 ## Configuration
