@@ -21,6 +21,82 @@
 ## Inviting Bot to your Discord server
  To invite bot go to the [Discord Developer page](https://discord.com/developers/applications/), select your bot and  go to the OAuth2 tab. Scroll down and check the **applications.commands** and **bot** checkboxes. Bot permissions should have appeard. Check **Read Messages/View Channels**, **Send Messages**, **Manage Messages**, **Embed Links**, **Read Message History**, **Add Reactions**, **Connect** and **Speak** permissons checkboxes. Copy generated URL and paste it into your browser. Choose server and click **Authorize** button.
 
- ## Issues
-  If your bot won't play music and you can see "Video returned by YouTube isn't what was requested" exception in your Lavalink, you need to download the patched version of Lavalink from the [Lavalink 
-support Discord](https://lavalink.dev/#need-help).
+## Lavalink Settings
+ You can find example application.yml file under this [link](https://github.com/lavalink-devs/Lavalink/blob/master/LavalinkServer/application.yml.example/). You can also copy my application.yml options. Remember to change **port**, **address** and **password** to match the values from your **appsettings.json file**.
+```
+server:
+  port: 2333
+  address: 0.0.0.0
+  http2:
+    enabled: false
+plugins:
+  youtube:
+    enabled: true
+    clients: ["MUSIC", "WEB"]
+lavalink:
+  plugins:
+    - dependency: "dev.lavalink.youtube:youtube-plugin:1.1.0"
+      snapshot: false
+  server:
+    password: "youshallnotpass"
+    sources:
+      youtube: false
+      bandcamp: false
+      soundcloud: true
+      twitch: false
+      vimeo: false
+      nico: false
+      http: false
+      local: false
+    filters:
+      volume: true
+      equalizer: true
+      karaoke: true
+      timescale: true
+      tremolo: true
+      vibrato: true
+      distortion: true
+      rotation: true
+      channelMix: true
+      lowPass: true
+    bufferDurationMs: 1200
+    opusEncodingQuality: 8
+    resamplingQuality: LOW
+    trackStuckThresholdMs: 10000
+    useSeekGhosting: true
+    youtubePlaylistLoadLimit: 6
+    playerUpdateInterval: 5
+    youtubeSearchEnabled: true
+    soundcloudSearchEnabled: true
+    gc-warnings: true
+metrics:
+  prometheus:
+    enabled: false
+    endpoint: /metrics
+
+sentry:
+  dsn: ""
+  environment: ""
+
+logging:
+  file:
+    path: ./logs/
+
+  level:
+    root: INFO
+    lavalink: INFO
+
+  request:
+    enabled: true
+    includeClientInfo: true
+    includeHeaders: false
+    includeQueryString: true
+    includePayload: true
+    maxPayloadLength: 10000
+
+
+  logback:
+    rollingpolicy:
+      max-file-size: 1GB
+      max-history: 30
+```
