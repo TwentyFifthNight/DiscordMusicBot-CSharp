@@ -22,7 +22,7 @@
  To invite bot go to the [Discord Developer page](https://discord.com/developers/applications/), select your bot and  go to the OAuth2 tab. Scroll down and check the **applications.commands** and **bot** checkboxes. Bot permissions should have appeard. Check **Read Messages/View Channels**, **Send Messages**, **Manage Messages**, **Embed Links**, **Read Message History**, **Add Reactions**, **Connect** and **Speak** permissons checkboxes. Copy generated URL and paste it into your browser. Choose server and click **Authorize** button.
 
 ## Lavalink Settings
- You can find example application.yml file under this [link](https://github.com/lavalink-devs/Lavalink/blob/master/LavalinkServer/application.yml.example/). You can also copy my application.yml options. Remember to change **port**, **address** and **password** to match the values from your **appsettings.json file**.
+ An example application.yml file can be found at this [link](https://github.com/lavalink-devs/Lavalink/blob/master/LavalinkServer/application.yml.example/). You can also copy my application.yml options. Remember to change the **port**, **address** and **password** to match the values in the **appsettings.json file**.
 ```
 server:
   port: 2333
